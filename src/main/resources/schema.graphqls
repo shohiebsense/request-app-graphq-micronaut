@@ -1,0 +1,36 @@
+type Request {
+    id: ID!
+    title: String!
+    date: String!
+    status: String!
+    info: String!
+    type: String
+}
+
+
+type Query {
+    bookById(id: ID): Book
+    hello(name: String): String!
+    getAllRequests: [Request]
+    getAllBooks: [Book]
+}
+
+type Book {
+    id: ID
+    name: String
+    pageCount: Int
+    author: Author
+}
+
+type Author {
+    id: ID
+    firstName: String
+    lastName: String
+}
+
+
+
+type Mutation {
+    addRequest(title: String!, date: String!, status: String!, info: String!, type: String): Request!
+    updateRequestStatus(id: ID!, status: String!): Request!
+}
