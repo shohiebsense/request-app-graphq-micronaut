@@ -31,6 +31,6 @@ type Author {
 
 
 type Mutation {
-    addRequest(title: String!, date: String!, status: String!, info: String!, type: String): Request!
+    addRequest(title: String!, date: String!, status: String!, urgentLevel: String!, type: String): Request!
     updateRequestStatus(id: ID!, status: String!): Request!
 }
