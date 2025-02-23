@@ -3,8 +3,8 @@ type Request {
     title: String!
     date: String!
     status: String!
-    info: String!
-    type: String
+    type: String!
+    urgentLevel: String
 }
 
 

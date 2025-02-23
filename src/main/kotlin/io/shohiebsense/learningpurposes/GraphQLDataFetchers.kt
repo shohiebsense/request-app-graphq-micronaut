@@ -1,10 +1,11 @@
-package io.shohiebsense
+package io.shohiebsense.learningpurposes
 
 
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
 import jakarta.inject.Singleton
 
+//learning ground purposes
 @Singleton
 class GraphQLDataFetchers(private val dbRepository: DbRepository) {
 

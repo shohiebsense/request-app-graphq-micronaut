@@ -1,8 +1,11 @@
 package io.shohiebsense
 
-
+import com.fasterxml.jackson.databind.ObjectMapper
 import graphql.schema.DataFetcher
 import graphql.schema.DataFetchingEnvironment
+import io.micronaut.websocket.WebSocketBroadcaster
+import io.shohiebsense.models.MaintenanceRequest
+import jakarta.inject.Inject
 import jakarta.inject.Singleton
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -12,9 +15,9 @@ class Requests {
     private val requests = ConcurrentHashMap<Int, MaintenanceRequest>()
     private val idCounter = AtomicInteger(1)
 
-    fun addRequest(title: String, status: String, date: String, info: String, type: String?): MaintenanceRequest {
+    fun addRequest(title: String, status: String, date: String, urgentLevel: String, type: String): MaintenanceRequest {
         val id = idCounter.getAndIncrement()
-        val request = MaintenanceRequest(id, title, status = status, date = date, info = info, type = type)
+        val request = MaintenanceRequest(id, title = title, status = status, date = date, urgentLevel = urgentLevel, type = type)
         requests[id] = request
         return request
     }
@@ -39,20 +42,32 @@ class Requests {
 }
 
 @Singleton
-class GraphQLRequestDataFetchers(private val requests: Requests) {
+class GraphQLRequestDataFetchers(private val requests: Requests, private val broadcaster: WebSocketBroadcaster) {
+
+    @Inject
+    lateinit var objectMapper: ObjectMapper
+
     fun addRequestDataFetcher(): DataFetcher<MaintenanceRequest> {
         return DataFetcher { env: DataFetchingEnvironment ->
             val title = env.getArgument<String>("title")
-            val date = env.getArgument<String>("date") // Ensure date is passed
+            val date = env.getArgument<String>("date")
             val status = env.getArgument<String>("status")
-            val info = env.getArgument<String>("info")
-            val type = env.getArgument<String?>("type") // Optional type
+            val urgentLevel = env.getArgument<String>("urgent_level")
+            val type = env.getArgument<String>("type")
 
-            if (title.isNullOrBlank() || date.isNullOrBlank() || status.isNullOrBlank() || info.isNullOrBlank()) {
+            if (title.isNullOrBlank() || date.isNullOrBlank() || status.isNullOrBlank() || urgentLevel.isNullOrBlank() || type.isNullOrBlank()) {
                 throw IllegalArgumentException("All required fields must be provided.")
             }
 
-            val newRequest = requests.addRequest(title, date, status, info, type)
+            val newRequest = requests.addRequest(
+                title = title,
+                date = date,
+                status = status,
+                urgentLevel = urgentLevel,
+                type = type)
+            val jsonMessage = objectMapper.writeValueAsString(requests.getAllRequests())
+
+            broadcaster.broadcastSync(jsonMessage)
             newRequest
         }
     }

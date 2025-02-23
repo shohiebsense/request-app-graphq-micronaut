@@ -1,8 +1,9 @@
-package io.shohiebsense
+package io.shohiebsense.learningpurposes
 
 
 import jakarta.inject.Singleton
 
+//learning purposes
 @Singleton
 class DbRepository {
 

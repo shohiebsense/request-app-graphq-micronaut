@@ -11,11 +11,13 @@ import graphql.schema.idl.TypeRuntimeWiring
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.core.io.ResourceResolver
+import io.shohiebsense.learningpurposes.GraphQLDataFetchers
 import org.slf4j.LoggerFactory
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import jakarta.inject.Singleton
 
+//some mixed with learning ground purposes
 @Factory
 class GraphQLFactory {
 

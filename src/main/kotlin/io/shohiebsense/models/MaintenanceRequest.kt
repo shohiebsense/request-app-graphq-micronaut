@@ -1,4 +1,4 @@
-package io.shohiebsense
+package io.shohiebsense.models
 
 
 import io.micronaut.core.annotation.Introspected
@@ -10,10 +10,10 @@ import jakarta.persistence.*
 data class MaintenanceRequest(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: Int ,
+    val id: Int,
     val title: String,
     val date: String,
     var status: String,
-    val info: String,
-    val type: String? = null
+    val urgentLevel: String,
+    val type: String
 )
