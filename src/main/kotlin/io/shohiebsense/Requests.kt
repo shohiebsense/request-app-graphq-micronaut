@@ -9,51 +9,56 @@ import java.util.concurrent.atomic.AtomicInteger
 
 @Singleton
 class Requests {
-    private val requests = ConcurrentHashMap<Int, Request>()
+    private val requests = ConcurrentHashMap<Int, MaintenanceRequest>()
     private val idCounter = AtomicInteger(1)
 
-    fun addRequest(title: String, description: String): Request {
+    fun addRequest(title: String, status: String, date: String, info: String, type: String?): MaintenanceRequest {
         val id = idCounter.getAndIncrement()
-        val request = Request(id, title, description)
+        val request = MaintenanceRequest(id, title, status = status, date = date, info = info, type = type)
         requests[id] = request
         return request
     }
 
-    fun editRequest(id: Int, title: String?, description: String?): Request? {
+    fun editRequest(id: Int, title: String?, status: String?): MaintenanceRequest? {
         val request = requests[id] ?: return null
         val updatedRequest = request.copy(
             title = title ?: request.title,
-            description = description ?: request.description
+            status = status ?: request.status
         )
         requests[id] = updatedRequest
         return updatedRequest
     }
 
-    fun getRequestById(id: Int): Request? {
+    fun getRequestById(id: Int): MaintenanceRequest? {
         return requests[id]
     }
 
-    fun getAllRequests(): List<Request> {
+    fun getAllRequests(): List<MaintenanceRequest> {
         return requests.values.toList()
     }
 }
 
 @Singleton
 class GraphQLRequestDataFetchers(private val requests: Requests) {
-    fun addRequestDataFetcher(): DataFetcher<Request> {
+    fun addRequestDataFetcher(): DataFetcher<MaintenanceRequest> {
         return DataFetcher { env: DataFetchingEnvironment ->
             val title = env.getArgument<String>("title")
-            val description = env.getArgument<String>("description")
-            if (title != null) {
-                if (description != null) {
-                    requests.addRequest(title, description)
-                }
+            val date = env.getArgument<String>("date") // Ensure date is passed
+            val status = env.getArgument<String>("status")
+            val info = env.getArgument<String>("info")
+            val type = env.getArgument<String?>("type") // Optional type
+
+            if (title.isNullOrBlank() || date.isNullOrBlank() || status.isNullOrBlank() || info.isNullOrBlank()) {
+                throw IllegalArgumentException("All required fields must be provided.")
             }
-            null
+
+            val newRequest = requests.addRequest(title, date, status, info, type)
+            newRequest
         }
     }
 
-    fun editRequestDataFetcher(): DataFetcher<Request?> {
+
+    fun editRequestDataFetcher(): DataFetcher<MaintenanceRequest?> {
         return DataFetcher { env: DataFetchingEnvironment ->
             val id = env.getArgument<Int>("id")
             val title = env.getArgument<String>("title")
@@ -65,7 +70,7 @@ class GraphQLRequestDataFetchers(private val requests: Requests) {
         }
     }
 
-    fun getRequestByIdDataFetcher(): DataFetcher<Request?> {
+    fun getRequestByIdDataFetcher(): DataFetcher<MaintenanceRequest?> {
         return DataFetcher { env: DataFetchingEnvironment ->
             val id = env.getArgument<Int>("id")
             if (id != null) {
@@ -75,9 +80,7 @@ class GraphQLRequestDataFetchers(private val requests: Requests) {
         }
     }
 
-    fun getAllRequestsDataFetcher(): DataFetcher<List<Request>> {
+    fun getAllRequestsDataFetcher(): DataFetcher<List<MaintenanceRequest>> {
         return DataFetcher { requests.getAllRequests() }
     }
 }
-
-data class Request(val id: Int, val title: String, val description: String)

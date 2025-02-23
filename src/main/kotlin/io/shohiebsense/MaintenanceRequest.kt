@@ -3,7 +3,6 @@ package io.shohiebsense
 
 import io.micronaut.core.annotation.Introspected
 import jakarta.persistence.*
-import java.util.UUID
 
 @Entity
 @Table(name = "maintenance_requests")
@@ -11,7 +10,7 @@ import java.util.UUID
 data class MaintenanceRequest(
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    val id: UUID? = null,
+    val id: Int ,
     val title: String,
     val date: String,
     var status: String,
